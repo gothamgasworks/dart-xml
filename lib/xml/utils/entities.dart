@@ -351,12 +351,14 @@ typedef String ReplaceFunction(Match match);
 String encodeXmlText(String input) =>
     input.replaceAllMapped(_textPattern, _textReplace);
 
-final Pattern _textPattern = RegExp(r'[&<]|]]>');
+final Pattern _textPattern = RegExp(r'[&<>]|]]>');
 
 String _textReplace(Match match) {
   switch (match.group(0)) {
     case '<':
       return '&lt;';
+    case '>':
+      return '&gt;';
     case '&':
       return '&amp;';
     case ']]>':
@@ -376,8 +378,8 @@ final Map<XmlAttributeType, String> attributeQuote = {
 };
 
 final Map<XmlAttributeType, Pattern> _attributePattern = {
-  XmlAttributeType.SINGLE_QUOTE: RegExp(r"['&<\n\r\t]"),
-  XmlAttributeType.DOUBLE_QUOTE: RegExp(r'["&<\n\r\t]')
+  XmlAttributeType.SINGLE_QUOTE: RegExp(r"['&<>\n\r\t]"),
+  XmlAttributeType.DOUBLE_QUOTE: RegExp(r'["&<>\n\r\t]')
 };
 
 final Map<XmlAttributeType, ReplaceFunction> _attributeReplace = {
@@ -389,6 +391,8 @@ final Map<XmlAttributeType, ReplaceFunction> _attributeReplace = {
         return '&amp;';
       case '<':
         return '&lt;';
+      case '>':
+        return '&gt;';
       case '\n':
         return '&#xA;';
       case '\r':
@@ -406,6 +410,8 @@ final Map<XmlAttributeType, ReplaceFunction> _attributeReplace = {
         return '&amp;';
       case '<':
         return '&lt;';
+      case '>':
+        return '&gt;';
       case '\n':
         return '&#xA;';
       case '\r':
