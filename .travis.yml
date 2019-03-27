@@ -7,16 +7,18 @@ jobs:
     script: dartanalyzer --fatal-warnings .
   - stage: analyze
     script: dartfmt --dry-run --set-exit-if-changed .
-  - stage: build
-    script: pub run build_runner build
-  - stage: test
-    script: pub run build_runner test -- --platform vm
-  - stage: test
-    script: pub run build_runner test -- --platform chrome
+  - stage: unit_test
+    script: pub run test test/all_test.dart --platform vm
+  - stage: unit_test
+    script: pub run test test/all_test.dart --platform chrome
+  - stage: coverage
+    script:
+    - pub global activate dart_coveralls
+    - dart_coveralls report test/all_test.dart
 stages:
 - analyze
-- build
-- test
+- unit_test
+- coverage
 
 sudo: required
 cache:

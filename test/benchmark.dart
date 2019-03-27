@@ -1,13 +1,14 @@
 library xml.test.benchmark;
 
 import 'package:xml/xml.dart';
+import 'package:xml/xml_events.dart';
 
 import 'examples.dart';
 
 double benchmark(Function function, [int warmUp = 5, int milliseconds = 2500]) {
+  final watch = Stopwatch();
   var count = 0;
   var elapsed = 0;
-  var watch = Stopwatch();
   while (warmUp-- > 0) {
     function();
   }
@@ -21,8 +22,8 @@ double benchmark(Function function, [int warmUp = 5, int milliseconds = 2500]) {
 }
 
 String characterData() {
-  var string = '''a&bc<def"gehi'jklm>nopqr''';
-  var builder = XmlBuilder();
+  const string = '''a&bc<def"gehi'jklm>nopqr''';
+  final builder = XmlBuilder();
   builder.processing('xml', 'version="1.0"');
   builder.element('character', nest: () {
     for (var i = 0; i < 20; i++) {
@@ -36,21 +37,24 @@ String characterData() {
 }
 
 final Map<String, String> benchmarks = {
+  'atom': atomXml,
   'books': booksXml,
   'bookstore': bookstoreXml,
-  'atom': atomXml,
+  'complicated': complicatedXml,
   'shiporder': shiporderXsd,
   'decoding': characterData(),
 };
 
 void main() {
-  var builder = XmlBuilder();
+  final builder = XmlBuilder();
   builder.processing('xml', 'version="1.0"');
   builder.element('benchmarks', nest: () {
     for (var name in benchmarks.keys) {
       builder.element(name, nest: () {
         final source = benchmarks[name];
-        builder.text(benchmark(() => parse(source)));
+        builder.element('parser', nest: benchmark(() => parse(source)));
+        builder.element('iterator',
+            nest: benchmark(() => parseEvents(source).length));
       });
     }
   });

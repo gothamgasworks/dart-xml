@@ -2,45 +2,62 @@
 /// building XML documents.
 library xml;
 
-import 'package:petitparser/petitparser.dart' show Parser, ParserError;
+import 'package:petitparser/petitparser.dart' show Parser, Token;
+import 'package:xml/src/xml/nodes/document.dart';
+import 'package:xml/src/xml/parser.dart';
+import 'package:xml/src/xml/utils/exceptions.dart';
 
-import 'xml/nodes/document.dart';
-import 'xml/parser.dart';
-
-export 'xml/builder.dart' show XmlBuilder;
-export 'xml/grammar.dart' show XmlGrammarDefinition;
-export 'xml/nodes/attribute.dart' show XmlAttribute;
-export 'xml/nodes/cdata.dart' show XmlCDATA;
-export 'xml/nodes/comment.dart' show XmlComment;
-export 'xml/nodes/data.dart' show XmlData;
-export 'xml/nodes/doctype.dart' show XmlDoctype;
-export 'xml/nodes/document.dart' show XmlDocument;
-export 'xml/nodes/document_fragment.dart' show XmlDocumentFragment;
-export 'xml/nodes/element.dart' show XmlElement;
-export 'xml/nodes/node.dart' show XmlNode;
-export 'xml/nodes/parent.dart' show XmlParent;
-export 'xml/nodes/processing.dart' show XmlProcessing;
-export 'xml/nodes/text.dart' show XmlText;
-export 'xml/parser.dart' show XmlParserDefinition;
-export 'xml/reader.dart' show XmlReader;
-export 'xml/utils/attribute_type.dart' show XmlAttributeType;
-export 'xml/utils/name.dart' show XmlName;
-export 'xml/utils/named.dart' show XmlNamed;
-export 'xml/utils/node_type.dart' show XmlNodeType;
-export 'xml/utils/owned.dart' show XmlOwned;
-export 'xml/utils/writable.dart' show XmlWritable;
-export 'xml/visitors/transformer.dart' show XmlTransformer;
-export 'xml/visitors/visitable.dart' show XmlVisitable;
-export 'xml/visitors/visitor.dart' show XmlVisitor;
+export 'package:xml/src/xml/builder.dart' show XmlBuilder;
+export 'package:xml/src/xml/grammar.dart' show XmlGrammarDefinition;
+export 'package:xml/src/xml/nodes/attribute.dart' show XmlAttribute;
+export 'package:xml/src/xml/nodes/cdata.dart' show XmlCDATA;
+export 'package:xml/src/xml/nodes/comment.dart' show XmlComment;
+export 'package:xml/src/xml/nodes/data.dart' show XmlData;
+export 'package:xml/src/xml/nodes/doctype.dart' show XmlDoctype;
+export 'package:xml/src/xml/nodes/document.dart' show XmlDocument;
+export 'package:xml/src/xml/nodes/document_fragment.dart'
+    show XmlDocumentFragment;
+export 'package:xml/src/xml/nodes/element.dart' show XmlElement;
+export 'package:xml/src/xml/nodes/node.dart' show XmlNode;
+export 'package:xml/src/xml/nodes/parent.dart' show XmlParent;
+export 'package:xml/src/xml/nodes/processing.dart' show XmlProcessing;
+export 'package:xml/src/xml/nodes/text.dart' show XmlText;
+export 'package:xml/src/xml/parser.dart' show XmlParserDefinition;
+export 'package:xml/src/xml/production.dart' show XmlProductionDefinition;
+export 'package:xml/src/xml/utils/attribute_type.dart' show XmlAttributeType;
+export 'package:xml/src/xml/utils/entities.dart'
+    show
+        encodeXmlText,
+        encodeXmlAttributeValue,
+        encodeXmlAttributeValueWithQuotes;
+export 'package:xml/src/xml/utils/exceptions.dart'
+    show
+        XmlException,
+        XmlParserException,
+        XmlNodeTypeException,
+        XmlParentException,
+        XmlTagException;
+export 'package:xml/src/xml/utils/name.dart' show XmlName;
+export 'package:xml/src/xml/utils/named.dart' show XmlNamed;
+export 'package:xml/src/xml/utils/node_type.dart' show XmlNodeType;
+export 'package:xml/src/xml/utils/owned.dart' show XmlOwned;
+export 'package:xml/src/xml/utils/token.dart' show XmlToken;
+export 'package:xml/src/xml/utils/writable.dart' show XmlWritable;
+export 'package:xml/src/xml/visitors/pretty_writer.dart' show XmlPrettyWriter;
+export 'package:xml/src/xml/visitors/transformer.dart' show XmlTransformer;
+export 'package:xml/src/xml/visitors/visitable.dart' show XmlVisitable;
+export 'package:xml/src/xml/visitors/visitor.dart' show XmlVisitor;
+export 'package:xml/src/xml/visitors/writer.dart' show XmlWriter;
 
 final Parser _parser = XmlParserDefinition().build();
 
 /// Return an [XmlDocument] for the given `input` string, or throws an
-/// [ArgumentError] if the input is invalid.
+/// [XmlParserException] if the input is invalid.
 XmlDocument parse(String input) {
-  var result = _parser.parse(input);
+  final result = _parser.parse(input);
   if (result.isFailure) {
-    throw ArgumentError(ParserError(result).toString());
+    final position = Token.lineAndColumnOf(input, result.position);
+    throw XmlParserException(result.message, position[0], position[1]);
   }
   return result.value;
 }

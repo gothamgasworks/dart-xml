@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.4.0
+
+* Dart 2.2 compatibility and requirement.
+* Take advantage of PetitParser fast-parse mode:
+  * 15-30% faster DOM parsing, and
+  * 15-50% faster event parsing.
+* Improve error messages and reporting.
+
+## 3.3.0
+
+* New event based parsing in `xml_events`:
+  * Lazy event parsing from a XML string into an `Iterable` of `XmlEvent`.
+  * Async converters between streams of XML, `XmlEvent` and `XmlNode`.
+* Clean up package structure by moving internal packages into the `src/` subtree.
+* Remove the experimental SAX parser, the event parser allows more flexible streaming XML consumption.
+
+## 3.2.4
+
+* Remove unnecessary whitespace when printing self-closing tags.
+* Remember if an element is self-closing for stable printing.
+
 ## 3.2.0
 
 * Migrated to PetitParser 2.0
@@ -26,6 +47,10 @@
 ## 2.5.0
 
 * Generic Method syntax with Dart 1.21
+
+## 2.4.5
+
+* Do no longer use ArgumentErrors, but instead use proper exceptions.
 
 ## 2.4.4
 
